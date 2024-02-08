@@ -5,6 +5,7 @@ const { ApiError } = require("../utils/ApiError.js");
 const Chat = require("../models/chat.model.js");
 const Option = require("../models/option.model.js");
 const Poll = require("../models/polling.model.js");
+const { searchExistedUser } = require("../utils/helpers.js");
 
 const postPoll = asyncHandler(async (req, res, next) => {
   const { question, options, isMultipleSelect } = req.body;
@@ -20,9 +21,9 @@ const postPoll = asyncHandler(async (req, res, next) => {
   console.log(newPoll);
   if (!newPoll) throw new ApiError(500, "Something went wrong");
   const newOptions = options.filter((option) => {
-    if (option?.optionText?.trim().length != 0) {
+    if (option?.trim().length != 0) {
       return {
-        optionText: option?.optionText?.trim(),
+        optionText: option?.trim(),
         pollId: newPoll?._id,
         votedBy: [],
         voteCount: 0,
@@ -73,7 +74,7 @@ const updatePoll = asyncHandler(async (req, res, next) => {
   } else {
     // multiple option allowed nhi hai
     // use aggregation because it will be easy to find voted user
-    const existedUserOption = await searchExistedUser(pollId);
+    const existedUserOption = await searchExistedUser(pollId,req.user._id);
     console.log(existedUserOption);
     if (!existedUserOption) {
       // means did not vote yet

@@ -30,7 +30,6 @@ const messages = document.getElementById("messages");
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
-  console.log(input.value);
   if (input.value) {
     const obj = {
       message: input.value,
@@ -67,47 +66,61 @@ function displayChat(sender, msg) {
   window.scrollTo(0, document.body.scrollHeight);
 }
 
-function addOption() {
-  const optionsContainer = document.getElementById("optionsContainer");
-  const optionCount = optionsContainer.children.length + 1;
+const createPollBtn = document.getElementById("createPollBtn");
+const pollModal = document.getElementById("pollModal");
+const closeBtn = document.querySelector(".close");
+const addOptionBtn = document.getElementById("addOptionBtn");
+const pollForm = document.getElementById("pollForm");
+const optionsContainer = document.getElementById("options");
 
-  if (optionCount <= 12) {
-    const optionDiv = document.createElement("div");
-    optionDiv.classList.add("option");
+createPollBtn.addEventListener("click", () => {
+  pollModal.style.display = "block";
+});
 
-    const label = document.createElement("label");
-    label.setAttribute("for", `option${optionCount}`);
-    label.textContent = `Option ${optionCount}:`;
+closeBtn.addEventListener("click", () => {
+  pollModal.style.display = "none";
+});
 
-    const input = document.createElement("input");
-    input.setAttribute("type", "text");
-    input.setAttribute("id", `option${optionCount}`);
-    input.setAttribute("name", `option${optionCount}`);
-
-    optionDiv.appendChild(label);
-    optionDiv.appendChild(input);
-
-    optionsContainer.appendChild(optionDiv);
-  } else {
-    alert("Maximum 12 options allowed!");
+window.addEventListener("click", (event) => {
+  if (event.target == pollModal) {
+    pollModal.style.display = "none";
   }
-}
-console.log(`hi`);
-/**
-   * 
-  <div>
-<h2>Poll Creator</h2>
-<form id="pollForm">
-  <label for="question">Question:</label><br>
-  <input type="text" id="question" name="question"><br><br>
-  <div id="optionsContainer">
-    <div class="option">
-      <label for="option1">Option 1:</label>
-      <input type="text" id="option1" name="option1">
-    </div>
-  </div>
-  <button type="button" onclick="addOption()">Add Option</button><br><br>
-  <input type="submit" value="Create Poll">
-</form>
-</div>
-   */
+});
+
+addOptionBtn.addEventListener("click", () => {
+  if (optionsContainer.lastElementChild.lastElementChild.value) {
+    const optionNum = optionsContainer.childElementCount + 1;
+    const div = document.createElement("div");
+    const label = document.createElement("label");
+    label.htmlFor = `option${optionNum}`;
+    label.textContent = `Option ${optionNum}:`;
+    const input = document.createElement("input");
+    input.type = "text";
+    input.id = `option${optionNum}`;
+    input.name = "option";
+    div.appendChild(label);
+    div.appendChild(input);
+    optionsContainer.appendChild(div);
+  }
+});
+
+pollForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const multiSelect = document.getElementById("multiSelect");
+  const questionInput = document.getElementById("question");
+
+  console.log(multiSelect.checked);
+  const n = optionsContainer.children.length;
+  const optionsList = [];
+  for (let i = 0; i < n; i++) {
+    optionsList.push(optionsContainer.children[i].children[1].value);
+  }
+  const obj = {
+    question: questionInput.value,
+    options: optionsList,
+    isMultipleSelect: multiSelect.checked,
+  };
+  console.log("Poll Data:", obj);
+  // Here you can send the pollData to your backend for further processing
+  pollModal.style.display = "none";
+});
