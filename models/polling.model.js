@@ -6,12 +6,15 @@ const pollingSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    options: [{ option: String, vote: Number }],
-    sender: {
+    createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
+    isMultipleSelect:{
+      type:Boolean,
+      defaultValues:false,
+    }
   },
   { timestamps: true }
 );

@@ -39,6 +39,14 @@ async function main() {
       callback();
     });
 
+    /**
+     * @description when poll is created then poll creater will call socket io and then socket will broadcast this poll to everyone
+     */
+    socket.on("poll created",async(poll,callback)=>{
+      console.log(poll);
+      socket.broadcast.emit("poll created",poll);
+    })
+    
     if (!socket.recovered) {
       try {
         await db.each(
