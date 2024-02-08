@@ -3,6 +3,7 @@ const express = require("express");
 const { join } = require("node:path");
 const cookieParser = require("cookie-parser");
 const userRoutes = require("./routes/user.routes.js");
+const chatRoutes = require("./routes/chat.routes.js");
 require("dotenv").config();
 const { createServer } = require("node:http");
 const { Server } = require("socket.io");
@@ -22,16 +23,19 @@ async function main() {
   });
 
   app.use("/user", userRoutes);
+  app.use("/chat", chatRoutes);
+  // io.on("connection", (socket) => {
+  //   socket.broadcast.emit("hello", "world");
+  // });
   const PORT = process.env.PORT || 3000;
   io.on("connection", async (socket) => {
     console.log(`user connected`);
-    // console.log(socket);
     socket.on("chat message", async (msg, clientOffset, callback) => {
       let result;
       console.log(msg);
       console.log(clientOffset);
       console.log(callback);
-      io.emit("chat message", msg);
+      socket.broadcast.emit("chat message", msg);
       callback();
     });
 
