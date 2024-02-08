@@ -1,6 +1,6 @@
 const { validationResult } = require("express-validator");
 const { ApiError } = require("../utils/ApiError.js");
-const { errorHandler } = require("../middleware/error.middleware.js");
+const { errorHandler } = require("../middlewares/error.middlewares.js");
 
 /**
  *

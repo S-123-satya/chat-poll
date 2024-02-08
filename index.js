@@ -10,7 +10,6 @@ const { Server } = require("socket.io");
 async function main() {
   const app = express();
   const httpServer = createServer(app);
-  console.log(httpServer);
   const io = new Server(httpServer, {
     connectionStateRecovery: {},
   });
@@ -26,23 +25,13 @@ async function main() {
   const PORT = process.env.PORT || 3000;
   io.on("connection", async (socket) => {
     console.log(`user connected`);
+    // console.log(socket);
     socket.on("chat message", async (msg, clientOffset, callback) => {
       let result;
-      try {
-        result = await db.run(
-          "INSERT INTO messages (content, client_offset) VALUES (?, ?)",
-          msg,
-          clientOffset
-        );
-      } catch (e) {
-        if (e.errno === 19 /* SQLITE_CONSTRAINT */) {
-          callback();
-        } else {
-          // nothing to do, just let the client retry
-        }
-        return;
-      }
-      io.emit("chat message", msg, result.lastID);
+      console.log(msg);
+      console.log(clientOffset);
+      console.log(callback);
+      io.emit("chat message", msg);
       callback();
     });
 

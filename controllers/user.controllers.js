@@ -26,7 +26,9 @@ const userRegister = asyncHandler(async (req, res, next) => {
   if (!user) {
     throw new ApiError(500, "something went wrong");
   }
-  const { accessToken, refreshToken } = generateAccessAndRefreshToken(user._id);
+  const { accessToken, refreshToken } =await generateAccessAndRefreshToken(user._id);
+  console.log(accessToken);
+  console.log(refreshToken);
   const newUser = await User.findById(user._id).select(
     "-password -refreshToken"
   );
@@ -44,10 +46,12 @@ const userRegister = asyncHandler(async (req, res, next) => {
 });
 
 const userLogin = asyncHandler(async (req, res, next) => {
-  const { username, email, password } = req.body;
+  const { username,  password } = req.body;
+  console.log(username);
   const user = await User.findOne({
-    $or: [{ username, email }],
+    $or: [{ username:username},{ email:username }],
   });
+  console.log(user);
   if (!user) {
     throw new ApiError(404, "User not found");
   }
@@ -55,18 +59,21 @@ const userLogin = asyncHandler(async (req, res, next) => {
   if (!isPasswordCorrect) {
     throw new ApiError(402, "Invalid password");
   }
-  const { accessToken, refreshToken } = generateAccessAndRefreshToken(user._id);
+  const { accessToken, refreshToken } =await generateAccessAndRefreshToken(user._id);
+  console.log(`access token`);
+  console.log(accessToken);
+  console.log(refreshToken);
   const newUser = await User.findById(user._id).select(
     "-password -refreshToken"
   );
   res
-    .status(201)
+    .status(200)
     .cookie("accessToken", accessToken)
     .cookie("refreshToken", refreshToken)
     .json(
       new ApiResponse(200, "User login successfully", {
         user: newUser,
-        accessToken,
+        accessToken:accessToken,
         refreshToken,
       })
     );

@@ -15,6 +15,7 @@
       #messages > li { padding: 0.5rem 1rem; }
       #messages > li:nth-child(odd) { background: #efefef; }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.7/axios.min.js" integrity="sha512-NQfB/bDaB8kaSXF8E77JjhHG5PM6XVRxvHzkZiwl3ddWCEPBa23T76MuWSwAJdMGJnmQqM0VeY9kFszsrBEFrQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   </head>
   <body>
     <ul id="messages"></ul>
@@ -40,6 +41,7 @@
   
       form.addEventListener('submit', (e) => {
         e.preventDefault();
+        console.log(input.value);
         if (input.value) {
           const clientOffset = `${socket.id}-${counter++}`;
           socket.emit('chat message', input.value, clientOffset);

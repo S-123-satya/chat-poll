@@ -6,6 +6,8 @@ module.exports.generateAccessAndRefreshToken=async(userId)=>{
         const accessToken=user.generateAccessToken();
         const refreshToken=user.generateRefreshToken();
         user.refreshToken=refreshToken;
+        console.log(`access helper token`,accessToken);
+        console.log(`refresh helper token`,refreshToken);
         await user.save({ validateBeforeSave: false });
         return {accessToken,refreshToken};
     } catch (error) {

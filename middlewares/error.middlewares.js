@@ -1,8 +1,8 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
-import { ApiError } from "../utils/ApiError.js";
-import { asyncHandler } from "../utils/AsyncHandler.js";
-import { removeUnusedMulterImageFilesOnError } from "../utils/helpers.js";
+const { ApiError } = require("../utils/ApiError.js");
+const { asyncHandler } = require("../utils/AsyncHandler.js");
+const { removeUnusedMulterImageFilesOnError } = require("../utils/helpers.js");
 
 /**
  *
@@ -14,7 +14,7 @@ import { removeUnusedMulterImageFilesOnError } from "../utils/helpers.js";
  *
  * @description This middleware is responsible to catch the errors from any request handler wrapped inside the {@link asyncHandler}
  */
-const errorHandler = (err, req, res, next) => {
+module.exports.errorHandler = (err, req, res, next) => {
   let error = err;
 
   // Check if the error is an instance of an ApiError class which extends native Error class
@@ -43,4 +43,3 @@ const errorHandler = (err, req, res, next) => {
   return res.status(error.statusCode).json(response);
 };
 
-export { errorHandler };

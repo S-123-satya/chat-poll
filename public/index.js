@@ -1,4 +1,3 @@
-console.log(io);
 function addOption() {
   const optionsContainer = document.getElementById("optionsContainer");
   const optionCount = optionsContainer.children.length + 1;
