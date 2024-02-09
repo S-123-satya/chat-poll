@@ -20,24 +20,28 @@ const postPoll = asyncHandler(async (req, res, next) => {
   const newPoll = await Poll.create(pollObj);
   console.log(newPoll);
   if (!newPoll) throw new ApiError(500, "Something went wrong");
-  const newOptions = options.filter((option) => {
+  const newOptions = []
+  options.filter((option) => {
     if (option?.trim().length != 0) {
-      return {
+      newOptions.push({
         optionText: option?.trim(),
         pollId: newPoll?._id,
         votedBy: [],
         voteCount: 0,
-      };
+      });
     }
   });
+  console.log(`line 33`);
+  console.log(newOptions);
   const optionResponse = await Option.insertMany(newOptions);
   if (!optionResponse) throw new ApiError(500, "Something went wrong");
   res
     .status(201)
     .json(
       new ApiResponse(201, "poll sent successfully", {
-        ...newPoll,
-        options: [...optionResponse],
+        newPoll,
+        options:optionResponse,
+        sender:req.user?.username,
       })
     );
 });

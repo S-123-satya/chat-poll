@@ -18,7 +18,6 @@ let counter = 0;
 
 const socket = io({
   ackTimeout: 10000,
-  retries: 3,
   auth: {
     serverOffset: 0,
   },
@@ -52,13 +51,79 @@ form.addEventListener("submit", async (e) => {
     input.value = "";
   }
 });
-
+/**
+ * @socket listing connections
+ */
 socket.on("chat message", (msg, serverOffset) => {
   console.log(msg);
   displayChat(msg.sender, msg.data.message);
   socket.auth.serverOffset = serverOffset;
 });
+socket.on("poll created", (poll) => {
+  // we need to display poll
+  console.log(poll);
+  displayPoll(poll);
+});
 
+/**
+ * @description display chat function
+ * @param {@param} sender
+ * @param {@param} msg
+ */
+
+function displayPoll(poll) {
+  // run a loop for generating options
+  const questionContainer = document.createElement("div");
+  questionContainer.id = poll?.newPoll?._id;
+  // Create question element
+  let sender=poll?.sender;
+  if(poll?.sender==user.username)
+    sender="You"
+  const questionElement = document.createElement("p");
+  questionElement.textContent = `${sender} : ${poll?.newPoll?.question}`;
+  questionContainer.appendChild(questionElement);
+  if (poll?.newPoll?.isMultipleSelect) {
+    //checkbox with multiple selection options
+    poll.options.forEach((option, index) => {
+      const optionElement = document.createElement("input");
+      optionElement.setAttribute("type", "checkbox");
+      optionElement.setAttribute("name", poll?.newPoll?._id);
+      optionElement.setAttribute("value", option?.optionText);
+      optionElement.id = option?._id;
+
+      const labelElement = document.createElement("label");
+      labelElement.setAttribute("for", option?._id);
+      labelElement.textContent = option?.optionText;
+
+      const optionWrapper = document.createElement("div");
+      optionWrapper.appendChild(optionElement);
+      optionWrapper.appendChild(labelElement);
+      questionContainer.appendChild(optionWrapper);
+    });
+  } else {
+    // radio button with single selection
+
+    // Create radio buttons for each option
+    poll.options.forEach((option, index) => {
+      const optionElement = document.createElement("input");
+      optionElement.setAttribute("type", "radio");
+      optionElement.setAttribute("name", poll?.newPoll?._id);
+      optionElement.setAttribute("value", option?.optionText);
+      optionElement.id = option?._id;
+
+      const labelElement = document.createElement("label");
+      labelElement.setAttribute("for", option?._id);
+      labelElement.textContent = option?.optionText;
+
+      const optionWrapper = document.createElement("div");
+      optionWrapper.appendChild(optionElement);
+      optionWrapper.appendChild(labelElement);
+      questionContainer.appendChild(optionWrapper);
+    });
+  }
+  messages.appendChild(questionContainer);
+  window.scrollTo(0, document.body.scrollHeight);
+}
 function displayChat(sender, msg) {
   const item = document.createElement("li");
   item.textContent = `${sender} : ${msg}`;
@@ -104,7 +169,7 @@ addOptionBtn.addEventListener("click", () => {
   }
 });
 
-pollForm.addEventListener("submit", (event) => {
+pollForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const multiSelect = document.getElementById("multiSelect");
   const questionInput = document.getElementById("question");
@@ -122,5 +187,8 @@ pollForm.addEventListener("submit", (event) => {
   };
   console.log("Poll Data:", obj);
   // Here you can send the pollData to your backend for further processing
+  const response = await axios.post(`${url}/poll`, obj);
+  console.log(response);
+  socket.emit("poll created", response.data.data);
   pollModal.style.display = "none";
 });
