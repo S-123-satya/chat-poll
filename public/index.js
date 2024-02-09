@@ -37,7 +37,6 @@ form.addEventListener("submit", async (e) => {
       };
       const clientOffset = `${socket.id}-${counter++}`;
       const response = await axios.post(`${url}/chat`, obj);
-      console.log(response);
       if (response.data.statusCode == 201) {
         //shoul send the obj because it contains more things and for more info we should send response data because it contains all the information like createdAt and updatedAt
         displayChat("You", response.data.data.message);
@@ -66,13 +65,11 @@ form.addEventListener("submit", async (e) => {
  * @socket listing connections
  */
 socket.on("chat message", (msg, serverOffset) => {
-  console.log(msg);
   displayChat(msg.sender, msg.data.message);
   socket.auth.serverOffset = serverOffset;
 });
 socket.on("poll created", (poll, serverOffset) => {
   // we need to display poll
-  console.log(poll);
   displayPoll(poll);
   socket.auth.serverOffset = serverOffset;
 });
@@ -85,13 +82,10 @@ socket.on("poll updated", (modify, serverOffset) => {
 
 function displayModifyPoll(modify) {
   const { updatedOption, existedUserOption } = modify;
-  console.log(updatedOption);
-  console.log(existedUserOption);
   if (updatedOption) {
     const updatedOptionItem = document.getElementById(
       String(updatedOption._id)
     );
-    console.log(updatedOptionItem.parentElement.lastChild);
     //now update the vote
     updatedOptionItem.parentElement.lastChild.innerText = `${updatedOption.optionText} :: ${updatedOption.voteCount}`;
   }
@@ -99,7 +93,6 @@ function displayModifyPoll(modify) {
     const existedUserOptionItem = document.getElementById(
       existedUserOption._id
     );
-    console.log(existedUserOptionItem.parentElement.lastChild);
     //now update the vote
     existedUserOptionItem.parentElement.lastChild.innerText = `${existedUserOption.optionText} :: ${existedUserOption.voteCount}`;
   }

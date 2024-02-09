@@ -1,5 +1,5 @@
-const loginBtn = document.getElementById("loginBtn");
 const url = `http://localhost:3000`;
+const loginBtn = document.getElementById("loginBtn");
 loginBtn.addEventListener("click", async (e) => {
   e.preventDefault();
   const username = document.getElementById("username").value;
