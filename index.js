@@ -47,20 +47,11 @@ async function main() {
       console.log(`in poll created group`);
       socket.broadcast.emit("poll created",poll);
     })
-    
-    if (!socket.recovered) {
-      try {
-        await db.each(
-          "SELECT id, content FROM messages WHERE id > ?",
-          [socket.handshake.auth.serverOffset || 0],
-          (_err, row) => {
-            socket.emit("chat message", row.content, row.id);
-          }
-        );
-      } catch (e) {
-        // something went wrong
-      }
-    }
+    socket.on("poll updated", async(modify, serverOffset) => {
+      // we need to display poll
+      console.log(modify);
+      socket.broadcast.emit("poll updated",modify);
+    });
   });
 
   const port = process.env.PORT;

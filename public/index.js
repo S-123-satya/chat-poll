@@ -59,30 +59,60 @@ socket.on("chat message", (msg, serverOffset) => {
   displayChat(msg.sender, msg.data.message);
   socket.auth.serverOffset = serverOffset;
 });
-socket.on("poll created", (poll,serverOffset) => {
+socket.on("poll created", (poll, serverOffset) => {
   // we need to display poll
   console.log(poll);
   displayPoll(poll);
   socket.auth.serverOffset = serverOffset;
 });
+socket.on("poll updated", (modify, serverOffset) => {
+  // we need to display poll
+  console.log(modify);
+  displayModifyPoll(modify);
+  socket.auth.serverOffset = serverOffset;
+});
 
+function displayModifyPoll(modify){
+  const {updatedOption,existedUserOption}=modify;
+  console.log(updatedOption);
+  console.log(existedUserOption);
+  if(updatedOption){
+    const updatedOptionItem = document.getElementById(String(updatedOption._id));
+    console.log(updatedOptionItem.parentElement.lastChild);
+    //now update the vote
+    updatedOptionItem.parentElement.lastChild.innerText=`${updatedOption.optionText} :: ${updatedOption.voteCount}`
+  }
+  if(existedUserOption){
+    const existedUserOptionItem = document.getElementById(existedUserOption._id);
+    console.log(existedUserOptionItem.parentElement.lastChild);
+    //now update the vote
+    existedUserOptionItem.parentElement.lastChild.innerText=`${existedUserOption.optionText} :: ${existedUserOption.voteCount}`
+  }
+}
 /**
  * @description display chat function
  * @param {@param} sender
  * @param {@param} msg
  */
 
-async function updatePollVote(e){
+async function updatePollVote(e) {
   console.log(e);
   console.log(e.target.checked);
   console.log(e.target?.id);
   console.log(e.target.parentElement?.parentElement?.id);
-  const obj={
-    pollId:e.target.parentElement?.parentElement?.id,
-    optionId:e.target?.id,
-  }
-  const response=await axios.patch(`${url}/poll`,obj);
+  const obj = {
+    pollId: e.target.parentElement?.parentElement?.id,
+    optionId: e.target?.id,
+  };
+  const response = await axios.patch(`${url}/poll`, obj);
   console.log(response);
+  const { existedUserOption, updatedOption } = response?.data?.data;
+  const modify = {
+    existedUserOption,
+    updatedOption,
+  };
+  socket.emit("poll updated", modify);
+  displayModifyPoll(modify);
 }
 
 function displayPoll(poll) {
@@ -90,9 +120,8 @@ function displayPoll(poll) {
   const questionContainer = document.createElement("div");
   questionContainer.id = poll?.newPoll?._id;
   // Create question element
-  let sender=poll?.sender;
-  if(poll?.sender==user.username)
-    sender="You"
+  let sender = poll?.sender;
+  if (poll?.sender == user.username) sender = "You";
   const questionElement = document.createElement("p");
   questionElement.textContent = `${sender} : ${poll?.newPoll?.question}`;
   questionContainer.appendChild(questionElement);
@@ -104,10 +133,10 @@ function displayPoll(poll) {
       optionElement.setAttribute("name", poll?.newPoll?._id);
       optionElement.setAttribute("value", option?.optionText);
       optionElement.id = option?._id;
-      optionElement.addEventListener('click',(e)=>{
+      optionElement.addEventListener("click", (e) => {
         e.preventDefault();
         console.log(e);
-      })
+      });
       const labelElement = document.createElement("label");
       labelElement.setAttribute("for", option?._id);
       labelElement.textContent = option?.optionText;
@@ -127,10 +156,10 @@ function displayPoll(poll) {
       optionElement.setAttribute("name", poll?.newPoll?._id);
       optionElement.setAttribute("value", option?.optionText);
       optionElement.id = option?._id;
-      optionElement.addEventListener('click',updatePollVote)
+      optionElement.addEventListener("click", updatePollVote);
       const labelElement = document.createElement("label");
       labelElement.setAttribute("for", option?._id);
-      labelElement.textContent = option?.optionText;
+      labelElement.textContent = `${option?.optionText} :: ${option?.voteCount}`;
 
       const optionWrapper = document.createElement("div");
       optionWrapper.appendChild(optionElement);
@@ -207,6 +236,6 @@ pollForm.addEventListener("submit", async (event) => {
   const response = await axios.post(`${url}/poll`, obj);
   console.log(response);
   socket.emit("poll created", response.data.data);
-  displayPoll(response.data.data)
+  displayPoll(response.data.data);
   pollModal.style.display = "none";
 });

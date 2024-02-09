@@ -20,7 +20,7 @@ const postPoll = asyncHandler(async (req, res, next) => {
   const newPoll = await Poll.create(pollObj);
   console.log(newPoll);
   if (!newPoll) throw new ApiError(500, "Something went wrong");
-  const newOptions = []
+  const newOptions = [];
   options.filter((option) => {
     if (option?.trim().length != 0) {
       newOptions.push({
@@ -35,15 +35,13 @@ const postPoll = asyncHandler(async (req, res, next) => {
   console.log(newOptions);
   const optionResponse = await Option.insertMany(newOptions);
   if (!optionResponse) throw new ApiError(500, "Something went wrong");
-  res
-    .status(201)
-    .json(
-      new ApiResponse(201, "poll sent successfully", {
-        newPoll,
-        options:optionResponse,
-        sender:req.user?.username,
-      })
-    );
+  res.status(201).json(
+    new ApiResponse(201, "poll sent successfully", {
+      newPoll,
+      options: optionResponse,
+      sender: req.user?.username,
+    })
+  );
 });
 
 const getAllPolls = asyncHandler(async (req, res, next) => {
@@ -73,15 +71,18 @@ const updatePoll = asyncHandler(async (req, res, next) => {
     res
       .status(201)
       .json(
-        new ApiResponse(201, "User voted", { option, isMultipleSelect: true })
+        new ApiResponse(201, "User voted", {
+          updatedOption: option,
+          isMultipleSelect: true,
+        })
       );
   } else {
     // multiple option allowed nhi hai
     // use aggregation because it will be easy to find voted user
-    let existedUserOption = await searchExistedUser(pollId,req.user._id);
-    console.log('line 82 in controller');
+    let existedUserOption = await searchExistedUser(pollId, req.user._id);
+    console.log("line 82 in controller");
     console.log(existedUserOption);
-    if (existedUserOption.length == 0) {
+    if (!existedUserOption) {
       // means did not vote yet
       const updatedOption = await Option.findById(optionId);
       updatedOption.votedBy.push(req.user?._id);
@@ -96,7 +97,7 @@ const updatePoll = asyncHandler(async (req, res, next) => {
        * @user voted so basically we have to delete/remove older vote and we have to update new vote
        * @first we will check that if user is voting the same older option or different new one
        */
-      if (existedUserOption[0]._id == optionId) {
+      if (existedUserOption._id == optionId) {
         // do nothing because it's same one
         res
           .status(409)
@@ -113,16 +114,20 @@ const updatePoll = asyncHandler(async (req, res, next) => {
         existedUserOption.votedBy = updatedUserForOlderOption;
         existedUserOption.voteCount -= 1;
         const olderOptionresponse = await existedUserOption.save();
-        console.log(response);
         // now update new option
         const updatedOption = await Option.findById(optionId);
         updatedOption.votedBy.push(req.user?._id);
         updatedOption.voteCount += 1;
         const response = await updatedOption.save();
         console.log(response);
-        req
+        res
           .status(201)
-          .json(new ApiResponse(201, "user voted", { existedUserOption, updatedOption }));
+          .json(
+            new ApiResponse(201, "user voted", {
+              existedUserOption,
+              updatedOption,
+            })
+          );
       }
     }
   }
