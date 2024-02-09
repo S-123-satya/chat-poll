@@ -22,6 +22,7 @@ module.exports.generateAccessAndRefreshToken = async (userId) => {
 
 module.exports.searchExistedUser = async (pollId, userId) => {
   try {
+    console.log(`line 25 in search existed user poll`);
     const response=await Option.aggregate([
       { $match: { pollId: pollId } },
       {

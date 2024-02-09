@@ -78,16 +78,17 @@ const updatePoll = asyncHandler(async (req, res, next) => {
   } else {
     // multiple option allowed nhi hai
     // use aggregation because it will be easy to find voted user
-    const existedUserOption = await searchExistedUser(pollId,req.user._id);
+    let existedUserOption = await searchExistedUser(pollId,req.user._id);
+    console.log('line 82 in controller');
     console.log(existedUserOption);
-    if (!existedUserOption) {
+    if (existedUserOption.length == 0) {
       // means did not vote yet
       const updatedOption = await Option.findById(optionId);
       updatedOption.votedBy.push(req.user?._id);
       updatedOption.voteCount += 1;
       const response = await updatedOption.save();
       console.log(response);
-      req
+      res
         .status(201)
         .json(new ApiResponse(201, "user voted", { updatedOption }));
     } else {
@@ -95,7 +96,7 @@ const updatePoll = asyncHandler(async (req, res, next) => {
        * @user voted so basically we have to delete/remove older vote and we have to update new vote
        * @first we will check that if user is voting the same older option or different new one
        */
-      if (existedUserOption._id == optionId) {
+      if (existedUserOption[0]._id == optionId) {
         // do nothing because it's same one
         res
           .status(409)

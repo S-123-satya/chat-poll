@@ -59,10 +59,11 @@ socket.on("chat message", (msg, serverOffset) => {
   displayChat(msg.sender, msg.data.message);
   socket.auth.serverOffset = serverOffset;
 });
-socket.on("poll created", (poll) => {
+socket.on("poll created", (poll,serverOffset) => {
   // we need to display poll
   console.log(poll);
   displayPoll(poll);
+  socket.auth.serverOffset = serverOffset;
 });
 
 /**
@@ -70,6 +71,19 @@ socket.on("poll created", (poll) => {
  * @param {@param} sender
  * @param {@param} msg
  */
+
+async function updatePollVote(e){
+  console.log(e);
+  console.log(e.target.checked);
+  console.log(e.target?.id);
+  console.log(e.target.parentElement?.parentElement?.id);
+  const obj={
+    pollId:e.target.parentElement?.parentElement?.id,
+    optionId:e.target?.id,
+  }
+  const response=await axios.patch(`${url}/poll`,obj);
+  console.log(response);
+}
 
 function displayPoll(poll) {
   // run a loop for generating options
@@ -90,7 +104,10 @@ function displayPoll(poll) {
       optionElement.setAttribute("name", poll?.newPoll?._id);
       optionElement.setAttribute("value", option?.optionText);
       optionElement.id = option?._id;
-
+      optionElement.addEventListener('click',(e)=>{
+        e.preventDefault();
+        console.log(e);
+      })
       const labelElement = document.createElement("label");
       labelElement.setAttribute("for", option?._id);
       labelElement.textContent = option?.optionText;
@@ -110,7 +127,7 @@ function displayPoll(poll) {
       optionElement.setAttribute("name", poll?.newPoll?._id);
       optionElement.setAttribute("value", option?.optionText);
       optionElement.id = option?._id;
-
+      optionElement.addEventListener('click',updatePollVote)
       const labelElement = document.createElement("label");
       labelElement.setAttribute("for", option?._id);
       labelElement.textContent = option?.optionText;
@@ -190,5 +207,6 @@ pollForm.addEventListener("submit", async (event) => {
   const response = await axios.post(`${url}/poll`, obj);
   console.log(response);
   socket.emit("poll created", response.data.data);
+  displayPoll(response.data.data)
   pollModal.style.display = "none";
 });

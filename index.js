@@ -35,15 +35,17 @@ async function main() {
       console.log(clientOffset);
       console.log(callback);
       socket.broadcast.emit("chat message", msg);
-      callback();
     });
 
     /**
      * @description when poll is created then poll creater will call socket io and then socket will broadcast this poll to everyone
      */
-    socket.on("poll created",async(poll,callback)=>{
+    socket.on("poll created",async(poll,clientOffset,callback)=>{
       console.log(poll);
-      socket.emit("poll created",poll);
+      console.log(`line 45 in socket io`);
+      console.log(clientOffset);
+      console.log(`in poll created group`);
+      socket.broadcast.emit("poll created",poll);
     })
     
     if (!socket.recovered) {
