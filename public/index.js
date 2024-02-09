@@ -72,21 +72,25 @@ socket.on("poll updated", (modify, serverOffset) => {
   socket.auth.serverOffset = serverOffset;
 });
 
-function displayModifyPoll(modify){
-  const {updatedOption,existedUserOption}=modify;
+function displayModifyPoll(modify) {
+  const { updatedOption, existedUserOption } = modify;
   console.log(updatedOption);
   console.log(existedUserOption);
-  if(updatedOption){
-    const updatedOptionItem = document.getElementById(String(updatedOption._id));
+  if (updatedOption) {
+    const updatedOptionItem = document.getElementById(
+      String(updatedOption._id)
+    );
     console.log(updatedOptionItem.parentElement.lastChild);
     //now update the vote
-    updatedOptionItem.parentElement.lastChild.innerText=`${updatedOption.optionText} :: ${updatedOption.voteCount}`
+    updatedOptionItem.parentElement.lastChild.innerText = `${updatedOption.optionText} :: ${updatedOption.voteCount}`;
   }
-  if(existedUserOption){
-    const existedUserOptionItem = document.getElementById(existedUserOption._id);
+  if (existedUserOption) {
+    const existedUserOptionItem = document.getElementById(
+      existedUserOption._id
+    );
     console.log(existedUserOptionItem.parentElement.lastChild);
     //now update the vote
-    existedUserOptionItem.parentElement.lastChild.innerText=`${existedUserOption.optionText} :: ${existedUserOption.voteCount}`
+    existedUserOptionItem.parentElement.lastChild.innerText = `${existedUserOption.optionText} :: ${existedUserOption.voteCount}`;
   }
 }
 /**
@@ -133,13 +137,10 @@ function displayPoll(poll) {
       optionElement.setAttribute("name", poll?.newPoll?._id);
       optionElement.setAttribute("value", option?.optionText);
       optionElement.id = option?._id;
-      optionElement.addEventListener("click", (e) => {
-        e.preventDefault();
-        console.log(e);
-      });
+      optionElement.addEventListener("click", updatePollVote);
       const labelElement = document.createElement("label");
       labelElement.setAttribute("for", option?._id);
-      labelElement.textContent = option?.optionText;
+      labelElement.textContent = `${option?.optionText} :: ${option?.voteCount}`;
 
       const optionWrapper = document.createElement("div");
       optionWrapper.appendChild(optionElement);

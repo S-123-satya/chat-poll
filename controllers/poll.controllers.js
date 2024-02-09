@@ -59,23 +59,35 @@ const updatePoll = asyncHandler(async (req, res, next) => {
     // multiple option selection allow hai
     const option = await Option.findById(optionId);
     if (!option) throw new ApiError(404, "Option not found");
-    const existedUser = option.votedBy.some((user) => user == req.user?._id);
+    const existedUser = option.votedBy.some(
+      (user) => String(user) == String(req.user?._id)
+    );
     console.log(existedUser);
     if (existedUser) {
       // do nothing silent kill it
-      res.status(200).json(new ApiResponse(409, "User already polled it"));
-    }
-    option.votedBy.push(req.user?._id);
-    option.voteCount += 1;
-    await option.save();
-    res
-      .status(201)
-      .json(
+      const newVotedby = option.votedBy.filter(
+        (user) => String(user) != String(req?.user?._id)
+      );
+      option.votedBy = newVotedby;
+      option.voteCount -= 1;
+      await option.save();
+      res.status(200).json(
         new ApiResponse(201, "User voted", {
           updatedOption: option,
           isMultipleSelect: true,
         })
       );
+    } else {
+      option.votedBy.push(req.user?._id);
+      option.voteCount += 1;
+      await option.save();
+      res.status(201).json(
+        new ApiResponse(201, "User voted", {
+          updatedOption: option,
+          isMultipleSelect: true,
+        })
+      );
+    }
   } else {
     // multiple option allowed nhi hai
     // use aggregation because it will be easy to find voted user
@@ -120,14 +132,12 @@ const updatePoll = asyncHandler(async (req, res, next) => {
         updatedOption.voteCount += 1;
         const response = await updatedOption.save();
         console.log(response);
-        res
-          .status(201)
-          .json(
-            new ApiResponse(201, "user voted", {
-              existedUserOption,
-              updatedOption,
-            })
-          );
+        res.status(201).json(
+          new ApiResponse(201, "user voted", {
+            existedUserOption,
+            updatedOption,
+          })
+        );
       }
     }
   }
