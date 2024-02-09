@@ -6,7 +6,7 @@ registerBtn.addEventListener('click',async(e)=>{
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
     if(!username || !email || !password){
-        console.log(`all mandotry are required`);
+        alert(`all mandotry are required`);
     }
     else{
         const obj={
@@ -15,7 +15,6 @@ registerBtn.addEventListener('click',async(e)=>{
             email,
         }
         const user=await axios.post(`${url}/user/register`,obj);
-        console.log(user);
         if(user.data.statusCode==201){
             //save user creaditials in localStorage
             const {accessToken,refreshToken}=user.data.data;

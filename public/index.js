@@ -239,7 +239,6 @@ pollForm.addEventListener("submit", async (event) => {
   const multiSelect = document.getElementById("multiSelect");
   const questionInput = document.getElementById("question");
 
-  console.log(multiSelect.checked);
   const n = optionsContainer.children.length;
   const optionsList = [];
   for (let i = 0; i < n; i++) {
@@ -250,10 +249,8 @@ pollForm.addEventListener("submit", async (event) => {
     options: optionsList,
     isMultipleSelect: multiSelect.checked,
   };
-  console.log("Poll Data:", obj);
   // Here you can send the pollData to your backend for further processing
   const response = await axios.post(`${url}/poll`, obj);
-  console.log(response);
   socket.emit("poll created", response.data.data);
   displayPoll(response.data.data);
   pollModal.style.display = "none";

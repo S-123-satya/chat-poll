@@ -18,7 +18,6 @@ const postPoll = asyncHandler(async (req, res, next) => {
     isMultipleSelect: isMultipleSelect || false,
   };
   const newPoll = await Poll.create(pollObj);
-  console.log(newPoll);
   if (!newPoll) throw new ApiError(500, "Something went wrong");
   const newOptions = [];
   options.filter((option) => {
@@ -31,8 +30,6 @@ const postPoll = asyncHandler(async (req, res, next) => {
       });
     }
   });
-  console.log(`line 33`);
-  console.log(newOptions);
   const optionResponse = await Option.insertMany(newOptions);
   if (!optionResponse) throw new ApiError(500, "Something went wrong");
   res.status(201).json(
@@ -47,7 +44,6 @@ const postPoll = asyncHandler(async (req, res, next) => {
 const getAllPolls = asyncHandler(async (req, res, next) => {
   const { createdAtOffset } = req.query || 0;
   const allPolls = await Poll.find({ created_at: { $gte: createdAtOffset } });
-  console.log(allPolls);
   res.status(200).json(new ApiResponse(200, "All messages are sent", allPolls));
 });
 
@@ -62,7 +58,6 @@ const updatePoll = asyncHandler(async (req, res, next) => {
     const existedUser = option.votedBy.some(
       (user) => String(user) == String(req.user?._id)
     );
-    console.log(existedUser);
     if (existedUser) {
       // do nothing silent kill it
       const newVotedby = option.votedBy.filter(
@@ -92,15 +87,12 @@ const updatePoll = asyncHandler(async (req, res, next) => {
     // multiple option allowed nhi hai
     // use aggregation because it will be easy to find voted user
     let existedUserOption = await searchExistedUser(pollId, req.user._id);
-    console.log("line 82 in controller");
-    console.log(existedUserOption);
     if (!existedUserOption) {
       // means did not vote yet
       const updatedOption = await Option.findById(optionId);
       updatedOption.votedBy.push(req.user?._id);
       updatedOption.voteCount += 1;
       const response = await updatedOption.save();
-      console.log(response);
       res
         .status(201)
         .json(new ApiResponse(201, "user voted", { updatedOption }));
@@ -131,7 +123,6 @@ const updatePoll = asyncHandler(async (req, res, next) => {
         updatedOption.votedBy.push(req.user?._id);
         updatedOption.voteCount += 1;
         const response = await updatedOption.save();
-        console.log(response);
         res.status(201).json(
           new ApiResponse(201, "user voted", {
             existedUserOption,

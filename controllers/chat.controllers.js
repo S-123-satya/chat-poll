@@ -19,7 +19,6 @@ const getAllChats=asyncHandler(async(req,res,next)=>{
     const {createdAtOffset} = req.query || 0;
     const allChats=await Chat.find({created_at: {"$gte": createdAtOffset}})
     const allPolls=await Poll.find({created_at: {"$gte": createdAtOffset}})
-    console.log(allChats);
     res.status(200).json(new ApiResponse(200,"All messages are sent",{allChats,allPolls}));
 })
 

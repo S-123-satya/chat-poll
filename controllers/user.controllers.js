@@ -27,8 +27,6 @@ const userRegister = asyncHandler(async (req, res, next) => {
     throw new ApiError(500, "something went wrong");
   }
   const { accessToken, refreshToken } =await generateAccessAndRefreshToken(user._id);
-  console.log(accessToken);
-  console.log(refreshToken);
   const newUser = await User.findById(user._id).select(
     "-password -refreshToken"
   );
@@ -47,11 +45,9 @@ const userRegister = asyncHandler(async (req, res, next) => {
 
 const userLogin = asyncHandler(async (req, res, next) => {
   const { username,  password } = req.body;
-  console.log(username);
   const user = await User.findOne({
     $or: [{ username:username},{ email:username }],
   });
-  console.log(user);
   if (!user) {
     throw new ApiError(404, "User not found");
   }
@@ -60,9 +56,6 @@ const userLogin = asyncHandler(async (req, res, next) => {
     throw new ApiError(402, "Invalid password");
   }
   const { accessToken, refreshToken } =await generateAccessAndRefreshToken(user._id);
-  console.log(`access token`);
-  console.log(accessToken);
-  console.log(refreshToken);
   const newUser = await User.findById(user._id).select(
     "-password -refreshToken"
   );
