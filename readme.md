@@ -5,6 +5,7 @@
 - cd my-chat-poll
 - npm install
 - rename env.sample to just .env
+- copy your full mongodb string with username and password in .env file
 - npm run start
 
 # happy coding
@@ -22,3 +23,6 @@
 - You can choose between multi option selection or single option selection
 - seamless user experience with one time login 
 - real time chat with socket.io
+
+# Report bug
+- [satyaprakash](satyaprakash5056742@gmail.com)
