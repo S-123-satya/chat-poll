@@ -29,26 +29,37 @@ const messages = document.getElementById("messages");
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
-  if (input.value) {
-    const obj = {
-      message: input.value,
-      sender: user._id,
-    };
-    const clientOffset = `${socket.id}-${counter++}`;
-    const response = await axios.post(`${url}/chat`, obj);
-    console.log(response);
-    if (response.data.statusCode == 201) {
-      //shoul send the obj because it contains more things and for more info we should send response data because it contains all the information like createdAt and updatedAt
-      displayChat("You", response.data.data.message);
-      socket.emit(
-        "chat message",
-        { data: response.data.data, sender: user.username },
-        clientOffset
-      );
-    } else {
-      alert("someting went wrong");
+  try {
+    if (input.value) {
+      const obj = {
+        message: input.value,
+        sender: user._id,
+      };
+      const clientOffset = `${socket.id}-${counter++}`;
+      const response = await axios.post(`${url}/chat`, obj);
+      console.log(response);
+      if (response.data.statusCode == 201) {
+        //shoul send the obj because it contains more things and for more info we should send response data because it contains all the information like createdAt and updatedAt
+        displayChat("You", response.data.data.message);
+        socket.emit(
+          "chat message",
+          { data: response.data.data, sender: user.username },
+          clientOffset
+        );
+      } else {
+        alert("someting went wrong");
+      }
+      input.value = "";
     }
-    input.value = "";
+  } catch (error) {
+    const refreshToken=localStorage.getItem("refreshToken");
+    axios.post(`${url}/user/refresh`,{refreshToken})
+    .then(user=>{
+      const {accessToken,refreshToken}=user.data.data;
+      localStorage.setItem("refreshToken", refreshToken);
+      localStorage.setItem("accessToken", accessToken);
+    })
+    .catch(err=>console.log(`login again token expire or sothing went wrong`))
   }
 });
 /**
@@ -100,23 +111,30 @@ function displayModifyPoll(modify) {
  */
 
 async function updatePollVote(e) {
-  console.log(e);
-  console.log(e.target.checked);
-  console.log(e.target?.id);
-  console.log(e.target.parentElement?.parentElement?.id);
-  const obj = {
-    pollId: e.target.parentElement?.parentElement?.id,
-    optionId: e.target?.id,
-  };
-  const response = await axios.patch(`${url}/poll`, obj);
-  console.log(response);
-  const { existedUserOption, updatedOption } = response?.data?.data;
-  const modify = {
-    existedUserOption,
-    updatedOption,
-  };
-  socket.emit("poll updated", modify);
-  displayModifyPoll(modify);
+ 
+  try {
+    const obj = {
+      pollId: e.target.parentElement?.parentElement?.id,
+      optionId: e.target?.id,
+    };
+    const response = await axios.patch(`${url}/poll`, obj);
+    const { existedUserOption, updatedOption } = response?.data?.data;
+    const modify = {
+      existedUserOption,
+      updatedOption,
+    };
+    socket.emit("poll updated", modify);
+    displayModifyPoll(modify);
+  } catch (error) {
+    const refreshToken=localStorage.getItem("refreshToken");
+    axios.post(`${url}/user/refresh`,{refreshToken})
+    .then(user=>{
+      const {accessToken,refreshToken}=user.data.data;
+      localStorage.setItem("refreshToken", refreshToken);
+      localStorage.setItem("accessToken", accessToken);
+    })
+    .catch(err=>console.log(`login again token expire or sothing went wrong`))
+  }
 }
 
 function displayPoll(poll) {
